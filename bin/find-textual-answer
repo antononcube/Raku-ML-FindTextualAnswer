@@ -1,7 +1,7 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use WWW::OpenAI;
+use ML::FindTextualAnswer;
 use JSON::Fast;
 
 my %*SUB-MAIN-OPTS =
