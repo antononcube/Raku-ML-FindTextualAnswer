@@ -108,21 +108,23 @@ find-textual-answer --help
 
 ## Mermaid diagram
 
-The following flowchart corresponds to the steps in the package function `openai-playground`:
+The following flowchart corresponds to the steps in the package function `find-textual-answer` 
+with method "LLM" (which stands for "Large Language Models"):
 
 ```mermaid
 graph TD
-	UI[/Some natural language text/]
+	UI[/-Some natural language text<br>-Questions/]
 	TO[/"OpenAI<br/>Processed output"/]
 	WR[[Web request]]
-	OpenAI{{https://platform.openai.com}}
+	OpenAI{{OpenAI}}
+	PaLM{{PaLM}}
 	PJ[Parse JSON]
 	Q{Return<br>hash?}
 	MSTC[Compose query]
 	MURL[[Make URL]]
 	TTC[Process]
 	QAK{Auth key<br>supplied?}
-	EAK[["Try to find<br>OPENAI_API_KEY<br>in %*ENV"]]
+	EAK[["Try to find<br>API key<br>in %*ENV"]]
 	QEAF{Auth key<br>found?}
 	NAK[/Cannot find auth key/]
 	UI --> QAK
@@ -134,6 +136,7 @@ graph TD
 	QEAF --> |yes|TTC
 	TTC -.-> MURL -.-> WR -.-> TTC
 	WR -.-> |URL|OpenAI 
+	WR -.-> |URL|PaLM 
 	OpenAI -.-> |JSON|WR
 	TTC --> Q 
 	Q --> |yes|PJ
