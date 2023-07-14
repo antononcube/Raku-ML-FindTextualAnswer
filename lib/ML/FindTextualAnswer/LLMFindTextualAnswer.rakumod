@@ -32,6 +32,11 @@ our %llmQueryFunc =
         openai => -> $model { openai-is-chat-completion-model($model) ?? &OpenAIChatCompletion !! &OpenAITextCompletion; },
         palm => -> $model { palm-is-chat-completion-model($model) ?? &PaLMGenerateMessage !! &PaLMGenerateText; };
 
+# ChatGPT is a synonym of OpenAI
+%llmModules<chatgpt> = %llmModules<openai>;
+%llmDefaultModels<chatgpt> = %llmDefaultModels<openai>;
+%llmModelToEndPointFunc<chatgpt> = %llmModelToEndPointFunc<openai>;
+%llmQueryFunc<chatgpt> = %llmQueryFunc<openai>;
 
 #===========================================================
 # Register LLM
