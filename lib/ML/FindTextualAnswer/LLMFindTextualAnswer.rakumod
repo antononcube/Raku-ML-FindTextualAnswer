@@ -148,7 +148,14 @@ multi sub LLMFindTextualAnswer(Str $text is copy,
 
     my &func = %llmQueryFunc{$llm}($llm-model);
 
-    my $res = &func($query, model => $llm-model, format => 'values', |%args.grep({ $_.key ∉ <format echo> }).Hash);
+    my @knownParamNames = &func.candidates.map({ $_.signature.params.map({ $_.usage-name }) }).flat;
+    my $res = &func($query, model => $llm-model, format => 'values', |%args.grep({ $_.key ∉ <format echo> && $_.key ∈ @knownParamNames }).Hash);
+
+    if $echo {
+        my @unknownParamNames = %args.keys.grep({ $_ ∉ <format echo> && $_ ∉ @knownParamNames });
+        note "Unknown parameter names for the function {&func.name}: ", @unknownParamNames.raku
+        if @knownParamNames;
+    }
 
     if $echo { note "Result:", $res.raku; }
 
