@@ -2,6 +2,11 @@
 
 ## In brief
 
+This package provides function(s) for finding sub-strings in texts that appear to be answers
+to given questions according to certain Machine Learning (ML) algorithms or
+Large Language Models (LLMs).
+
+**Remark:** Currently only LLMs are used via the packages "WWW::OpenAI", [AAp1], and "WWW::PaLM", [AAp2].
 
 -----
 
@@ -37,7 +42,7 @@ area, it is the largest lake in South America";
 find-textual-answer($text, "Where is Titicaca?")
 ```
 ```
-# Titicaca is located in Peru.
+# Titicaca is located in Bolivia.
 ```
 
 By default `find-textual-answer` tries to give short answers.
@@ -46,7 +51,7 @@ the request is one those phrases:
 - "give the shortest answer of the question:"
 - "list the shortest answers of the questions:"
 
-In the example above the full query given to OpenAI's models is
+In the example above the full query given to LLM is
 
 > Given the text "Lake Titicaca is a large, deep lake in the Andes
 on the border of Bolivia and Peru. By volume of water and by surface
@@ -60,18 +65,18 @@ Here we get a longer answer by changing the value of "request":
 find-textual-answer($text, "Where is Titicaca?", request => "answer the question:")
 ```
 ```
-# Titicaca is located in Peru.
+# Lake Titicaca is in Peru.
 ```
 
 **Remark:** The function `find-textual-answer` is inspired by the Mathematica function
-[`FindTextualAnswer`](https://reference.wolfram.com/language/ref/FindTextualAnswer.html); 
-see [JL1]. Unfortunately, at this time implementing the full signature of `FindTextualAnswer`
-with OpenAI's API is not easy. (Or cheap to execute.)
+[`FindTextualAnswer`](https://reference.wolfram.com/language/ref/FindTextualAnswer.html), [WRI1]; 
+see [JL1] for details. Unfortunately, at this time implementing the full signature of `FindTextualAnswer`
+with APIs of OpenAI and PaLM is not easy.
 
 #### Multiple questions
 
-If several questions are given to the function `openai-find-textual-answer`
-then all questions are spliced with the given text into one query (that is sent to OpenAI.)
+If several questions are given to the function `find-textual-answer`
+then all questions are spliced with the given text into one query (that is sent to LLM.)
 
 For example, consider the following text and questions:
 
@@ -88,7 +93,7 @@ my @questions =
 # [What is the dataset? What is the method? Which metrics to show?]
 ```
 
-Then the query send to OpenAI is:
+Then the query send to the LLM (ChatGPT/PaLM/YandexGPT) is:
 
 > Given the text: "Make a classifier with the method RandomForest over the data dfTitanic; show precision and accuracy."
 > list the shortest answers of the questions:   
@@ -98,7 +103,7 @@ Then the query send to OpenAI is:
 
 
 The answers are assumed to be given in the same order as the questions, each answer in a separated line.
-Hence, by splitting the OpenAI result into lines we get the answers corresponding to the questions.  
+Hence, by splitting the LLM result into lines we get the answers corresponding to the questions.  
 
 If the questions are missing question marks, it is likely that the result may have a completion as 
 a first line followed by the answers. In that situation the answers are not parsed and a warning message is given.
@@ -114,7 +119,7 @@ find-textual-answer --help
 ```
 ```
 # Usage:
-#   find-textual-answer [<words> ...] [-q|--questions=<Str>] [--llm=<Str>] [--mt|--max-tokens[=UInt]] [-m|--llm-model=<Str>] [-t|--temperature[=Real]] [-r|--request=<Str>] [-p|--pairs] [-a|--auth-key=<Str>] [--timeout[=UInt]] [--echo] [-f|--format=<Str>] [--method=<Str>] -- Command given as a sequence of words.
+#   /Users/antonov/.rakubrew/versions/moar-2023.06/share/perl6/site/bin/find-textual-answer [<words> ...] [-q|--questions=<Str>] [--llm=<Str>] [--mt|--max-tokens[=UInt]] [-m|--llm-model=<Str>] [-t|--temperature[=Real]] [-r|--request=<Str>] [-p|--pairs] [-a|--auth-key=<Str>] [--timeout[=UInt]] [--echo] [-f|--format=<Str>] [--method=<Str>] -- Command given as a sequence of words.
 #   
 #     -q|--questions=<Str>        Questions separated with '?' or ';'.
 #     --llm=<Str>                 Large Language Model, one of 'openai', 'palm', or 'Whatever'. [default: 'Whatever']
@@ -139,8 +144,8 @@ with method "LLM" (which stands for "Large Language Models"):
 
 ```mermaid
 graph TD
-	UI[/-Some natural language text<br>-Questions/]
-	TO[/"OpenAI<br/>Processed output"/]
+	UI[/"1) Natural language text<br>2) Questions"/]
+	TO[/"Answers"/]
 	WR[[Web request]]
 	OpenAI{{OpenAI}}
 	PaLM{{PaLM}}
@@ -185,6 +190,12 @@ graph TD
 ["New in the Wolfram Language: FindTextualAnswer"](https://blog.wolfram.com/2018/02/15/new-in-the-wolfram-language-findtextualanswer),
 (2018),
 [blog.wolfram.com](https://blog.wolfram.com/).
+
+### Functions
+
+[WRI1] Wolfram Research (2018), 
+FindTextualAnswer, 
+Wolfram Language function, https://reference.wolfram.com/language/ref/FindTextualAnswer.html (updated 2020).
 
 ### Packages
 
