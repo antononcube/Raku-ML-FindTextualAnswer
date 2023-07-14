@@ -42,6 +42,12 @@ our %llmQueryFunc =
 # Register LLM
 #===========================================================
 
+our sub register-llm(Str :$llm!, Str :$module!, Str :$default-model!, :&model-to-end-point-func!, :&query-func!) is export {
+    %llmModules{$llm} = $module;
+    %llmDefaultModels{$llm} = $default-model;
+    %llmModelToEndPointFunc{$llm} =  &model-to-end-point-func;
+    %llmQueryFunc{$llm} = &query-func
+}
 
 #===========================================================
 # FindTextualAnswer by LLM
