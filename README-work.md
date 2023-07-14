@@ -101,6 +101,16 @@ a first line followed by the answers. In that situation the answers are not pars
 
 -------
 
+## Registering new LLMs
+
+Upon installation the package "ML::FindTextualAnswer" knows how to access the LLMs ChatGPT and PaLM.
+(I.e. "ML::FindTextualAnswer" dependents on "WWW::OpenAI" and "WWW:PaLM".)
+
+Other LLMs can be registered using `register-llm` of the module "ML::FindTextualAnswer::LLMFindTextualAnswer" --
+see the corresponding test file ["./xt/03-register-llm.t"](./xt/03-register-llm.t).
+
+-------
+
 ## Command Line Interface
 
 The package provides a CLI script for finding textual answers:

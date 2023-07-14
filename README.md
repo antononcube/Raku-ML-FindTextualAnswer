@@ -65,7 +65,7 @@ Here we get a longer answer by changing the value of "request":
 find-textual-answer($text, "Where is Titicaca?", request => "answer the question:")
 ```
 ```
-# Lake Titicaca is in Peru.
+# Titicaca is located in Peru.
 ```
 
 **Remark:** The function `find-textual-answer` is inspired by the Mathematica function
@@ -107,6 +107,16 @@ Hence, by splitting the LLM result into lines we get the answers corresponding t
 
 If the questions are missing question marks, it is likely that the result may have a completion as 
 a first line followed by the answers. In that situation the answers are not parsed and a warning message is given.
+
+-------
+
+## Registering new LLMs
+
+Upon installation the package "ML::FindTextualAnswer" knows how to access the LLMs ChatGPT and PaLM.
+(I.e. "ML::FindTextualAnswer" dependents on "WWW::OpenAI" and "WWW:PaLM".)
+
+Other LLMs can be registered using `register-llm` of the module "ML::FindTextualAnswer::LLMFindTextualAnswer" --
+see the corresponding test file ["./xt/03-register-llm.t"](./xt/03-register-llm.t).
 
 -------
 
