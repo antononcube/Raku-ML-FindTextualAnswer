@@ -119,7 +119,7 @@ find-textual-answer --help
 ```
 ```
 # Usage:
-#   /Users/antonov/.rakubrew/versions/moar-2023.06/share/perl6/site/bin/find-textual-answer [<words> ...] [-q|--questions=<Str>] [--llm=<Str>] [--mt|--max-tokens[=UInt]] [-m|--llm-model=<Str>] [-t|--temperature[=Real]] [-r|--request=<Str>] [-p|--pairs] [-a|--auth-key=<Str>] [--timeout[=UInt]] [--echo] [-f|--format=<Str>] [--method=<Str>] -- Command given as a sequence of words.
+#   find-textual-answer [<words> ...] [-q|--questions=<Str>] [--llm=<Str>] [--mt|--max-tokens[=UInt]] [-m|--llm-model=<Str>] [-t|--temperature[=Real]] [-r|--request=<Str>] [-p|--pairs] [-a|--auth-key=<Str>] [--timeout[=UInt]] [--echo] [-f|--format=<Str>] [--method=<Str>] -- Command given as a sequence of words.
 #   
 #     -q|--questions=<Str>        Questions separated with '?' or ';'.
 #     --llm=<Str>                 Large Language Model, one of 'openai', 'palm', or 'Whatever'. [default: 'Whatever']
