@@ -6,7 +6,7 @@ use lib './lib';
 use ML::FindTextualAnswer;
 use Test;
 
-my $llm = 'openai',
+my $llm = 'chatgpt',
 my $method = 'tiny';
 #my $model = 'gpt-3.5-turbo';
 my $model = 'text-curie-001';
