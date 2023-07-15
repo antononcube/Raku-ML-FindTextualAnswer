@@ -4,7 +4,7 @@ use lib '.';
 use lib './lib';
 
 use ML::FindTextualAnswer;
-use ML::FindTextualAnswer::LLMFindTextualAnswer;
+use ML::FindTextualAnswer::LLM::TextualAnswer;
 
 use WWW::PaLM::Models;
 use WWW::PaLM::GenerateMessage;
@@ -24,6 +24,7 @@ plan *;
 ok register-llm( :$llm, module => 'WWW::PaLM', default-model => $model,
         model-to-end-point-func => &palm-model-to-end-points,
         query-func => -> $model { palm-is-chat-completion-model($model) ?? &PaLMGenerateMessage !! &PaLMGenerateText });
+
 ## 2
 my $text2 = 'make a classifier with the method RandomForest over the dataset dfTitanic; show accuracy and recall';
 my @questions = ['which method?', 'which dataset?', 'what metrics to display?'];

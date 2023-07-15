@@ -10,7 +10,7 @@ use WWW::PaLM::Models;
 use WWW::PaLM::GenerateText;
 use WWW::PaLM::GenerateMessage;
 
-unit module ML::FindTextualAnswer::LLMFindTextualAnswer;
+unit module ML::FindTextualAnswer::LLM::TextualAnswer;
 
 #===========================================================
 # Registered LLMs data structures
@@ -42,10 +42,14 @@ our %llmQueryFunc =
 # Register LLM
 #===========================================================
 
-our sub register-llm(Str :$llm!, Str :$module!, Str :$default-model!, :&model-to-end-point-func!, :&query-func!) is export {
+our sub register-llm(Str :$llm!,
+                     Str :$module!,
+                     Str :$default-model!,
+                     :&model-to-end-point-func!,
+                     :&query-func!) is export {
     %llmModules{$llm} = $module;
     %llmDefaultModels{$llm} = $default-model;
-    %llmModelToEndPointFunc{$llm} =  &model-to-end-point-func;
+    %llmModelToEndPointFunc{$llm} = &model-to-end-point-func;
     %llmQueryFunc{$llm} = &query-func
 }
 
@@ -54,42 +58,42 @@ our sub register-llm(Str :$llm!, Str :$module!, Str :$default-model!, :&model-to
 #===========================================================
 
 #| LLM utilization for finding textual answers.
-our proto LLMFindTextualAnswer(Str $text,
-                               $questions,
-                               :$llm is copy = Whatever,
-                               :$sep = Whatever,
-                               :model(:$llm-model) = Whatever,
-                               :$strip-with = Empty,
-                               :$prelude is copy = Whatever,
-                               :$request is copy = Whatever,
-                               Bool :p(:$pairs) = False,
-                               |) is export {*}
+our proto Fetch(Str $text,
+                $questions,
+                :$llm is copy = Whatever,
+                :$sep = Whatever,
+                :model(:$llm-model) = Whatever,
+                :$strip-with = Empty,
+                :$prelude is copy = Whatever,
+                :$request is copy = Whatever,
+                Bool :p(:$pairs) = False,
+                |) is export {*}
 
-multi sub LLMFindTextualAnswer(Str $text,
-                               Str $question,
-                               :$llm is copy = Whatever,
-                               :$sep = Whatever,
-                               :model(:$llm-model) = Whatever,
-                               :$strip-with = Empty,
-                               :$prelude is copy = Whatever,
-                               :$request is copy = Whatever,
-                               Bool :p(:$pairs) = False,
-                               *%args) {
-    my $res = LLMFindTextualAnswer($text, [$question,], :$llm, :$sep, :$llm-model, :$strip-with, :$prelude, :$request, :$pairs, |%args);
+multi sub Fetch(Str $text,
+                Str $question,
+                :$llm is copy = Whatever,
+                :$sep = Whatever,
+                :model(:$llm-model) = Whatever,
+                :$strip-with = Empty,
+                :$prelude is copy = Whatever,
+                :$request is copy = Whatever,
+                Bool :p(:$pairs) = False,
+                *%args) {
+    my $res = Fetch($text, [$question,], :$llm, :$sep, :$llm-model, :$strip-with, :$prelude, :$request, :$pairs, |%args);
     return $res ~~ Positional ?? $res[0] !! $res;
 }
 
 #| LLM utilization for finding textual answers.
-multi sub LLMFindTextualAnswer(Str $text is copy,
-                               @questions,
-                               :$llm is copy = Whatever,
-                               :$sep is copy = Whatever,
-                               :model(:$llm-model) is copy = Whatever,
-                               :$strip-with is copy = Empty,
-                               :$prelude is copy = Whatever,
-                               :$request is copy = Whatever,
-                               Bool :p(:$pairs) = False,
-                               *%args) {
+multi sub Fetch(Str $text is copy,
+                @questions,
+                :$llm is copy = Whatever,
+                :$sep is copy = Whatever,
+                :model(:$llm-model) is copy = Whatever,
+                :$strip-with is copy = Empty,
+                :$prelude is copy = Whatever,
+                :$request is copy = Whatever,
+                Bool :p(:$pairs) = False,
+                *%args) {
 
     #------------------------------------------------------
     # Process llm
@@ -164,7 +168,7 @@ multi sub LLMFindTextualAnswer(Str $text is copy,
 
     if $echo {
         my @unknownParamNames = %args.keys.grep({ $_ ∉ <format echo> && $_ ∉ @knownParamNames });
-        note "Unknown parameter names for the function {&func.name}: ", @unknownParamNames.raku
+        note "Unknown parameter names for the function { &func.name } : ", @unknownParamNames.raku
         if @knownParamNames;
     }
 

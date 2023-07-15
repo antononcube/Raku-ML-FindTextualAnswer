@@ -1,6 +1,6 @@
 use v6.d;
 
-use ML::FindTextualAnswer::LLMFindTextualAnswer;
+use ML::FindTextualAnswer::LLM::TextualAnswer;
 
 unit module ML::FindTextualAnswer;
 
@@ -11,6 +11,6 @@ unit module ML::FindTextualAnswer;
 our proto find-textual-answer(|) is export {*}
 
 multi sub find-textual-answer(**@args, *%args) {
-    return ML::FindTextualAnswer::LLMFindTextualAnswer::LLMFindTextualAnswer(|@args, |%args);
+    return ML::FindTextualAnswer::LLM::TextualAnswer::Fetch(|@args, |%args);
 }
 

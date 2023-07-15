@@ -1,14 +1,13 @@
 {
   "name": "ML::FindTextualAnswer",
   "description": "ML::FindTextualAnswer provides function(s) for finding sub-strings in a given text that appear to answer given questions.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "perl": "6.*",
   "authors": [
     "Anton Antonov"
   ],
   "auth": "zef:antononcube",
   "depends": [
-    "HTTP::Tiny:ver<0.2.5+>",
     "JSON::Fast:ver<0.17+>",
     "WWW::OpenAI:ver<0.2.4+>",
     "WWW::PaLM:ver<0.1.4+>"
@@ -17,7 +16,7 @@
   "test-depends": [],
   "provides": {
     "ML::FindTextualAnswer": "lib/ML/FindTextualAnswer.rakumod",
-    "ML::FindTextualAnswer::LLMFindTextualAnswer": "lib/ML/FindTextualAnswer/LLMFindTextualAnswer.rakumod"
+    "ML::FindTextualAnswer::LLM::TextualAnswer": "lib/ML/FindTextualAnswer/LLM/TextualAnswer.rakumod"
   },
   "resources": [],
   "license": "Artistic-2.0",
