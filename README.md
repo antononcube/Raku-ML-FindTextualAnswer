@@ -65,7 +65,7 @@ Here we get a longer answer by changing the value of "request":
 find-textual-answer($text, "Where is Titicaca?", request => "answer the question:")
 ```
 ```
-# Titicaca is located in Peru.
+# Titicaca is in Peru.
 ```
 
 **Remark:** The function `find-textual-answer` is inspired by the Mathematica function
