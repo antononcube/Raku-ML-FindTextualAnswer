@@ -169,7 +169,7 @@ multi sub Fetch(Str $text is copy,
     if $echo {
         my @unknownParamNames = %args.keys.grep({ $_ ∉ <format echo> && $_ ∉ @knownParamNames });
         note "Unknown parameter names for the function { &func.name } : ", @unknownParamNames.raku
-        if @knownParamNames;
+        if @unknownParamNames;
     }
 
     if $echo { note "Result:", $res.raku; }
