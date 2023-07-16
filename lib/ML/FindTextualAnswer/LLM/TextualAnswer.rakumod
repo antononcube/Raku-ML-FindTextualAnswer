@@ -182,6 +182,10 @@ multi sub Fetch(Str $text is copy,
     my @answers = [$res,];
     if @questions.elems > 1 {
         @answers = $res.lines.grep({ $_.chars > @questions.elems.Str.chars + $sep.chars + 1 });
+
+        if @answers.elems != @questions.elems {
+            @answers = $res.split(/ \v\v /, :skip-empty)
+        }
     }
 
     if $echo { note "Answers:", @answers.raku; }
