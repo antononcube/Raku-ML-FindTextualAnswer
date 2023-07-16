@@ -5,30 +5,54 @@ use ML::FindTextualAnswer::LLM::TextualAnswer;
 unit module ML::FindTextualAnswer;
 
 
-
 #===========================================================
 #| Finding substrings that appear to be answers of questions.
-our proto find-textual-answer(|) is export {*}
+our proto find-textual-answer($text, |) is export {*}
 
-multi sub find-textual-answer(**@args, *%args) {
+multi sub find-textual-answer($text, $question, UInt $n = 1, *%args) {
+    return find-textual-answer($text, [$question,], $n, |%args);
+}
+
+multi sub find-textual-answer($text,
+                              @questions,
+                              UInt $n = 1,
+                              :$finder is copy = Whatever,
+                              *%args
+                              ) {
 
     # Is method given
-    my $method = do if %args<method>:exists {
-        %args<method>
-    } else {
-        'llm'
-    }
+    if $finder.isa(Whatever) { $finder = 'llm'; }
+    die "The value of \$method is expected to be 'llm' or Whatever."
+    unless $finder ~~ Str && $finder ∈ <llm> || $finder ~~ Callable;
 
     # Delegate
-    return do given $method {
-        when $_ ∈ <llm chatgpt openai palm large-language-model large-language-models> {
-            ML::FindTextualAnswer::LLM::TextualAnswer::Fetch(|@args, |%args);
+    my $res = do given $finder {
+
+        when $_.Str eq 'llm' && $n == 1 {
+            ML::FindTextualAnswer::LLM::TextualAnswer::Fetch($text, @questions, |%args);
         }
+
+        when $_.Str eq 'llm' && $n > 1 {
+            my $s = @questions.elems == 1 ?? '' !! 's';
+            my $request = "{ @questions.elems == 1 ?? 'give' !! 'list' } the top $n answers for each of the question$s:";
+
+            my %args2 = %args.grep({ $_.key ∉ <prelude request> });
+
+            ML::FindTextualAnswer::LLM::TextualAnswer::Fetch($text,
+                                                             @questions,
+                                                             :$request,
+                                                             |%args2);
+        }
+
         default {
-            die "The method $method is not implemented.";
+            note "Unknown finder specifiction.";
         }
     }
+
+    # Result
+    return $res;
 }
+
 
 #===========================================================
 #| Finding substrings that appear to be answers of questions using a LLM.
