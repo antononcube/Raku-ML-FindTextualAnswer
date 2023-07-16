@@ -187,8 +187,14 @@ multi sub Fetch(Str $text is copy,
     if $echo { note "Answers:", @answers.raku; }
 
     if @answers.elems == @questions.elems {
-        @answers = @answers.map({ $_.subst(/ ^ \h* \d+ \h* $sep /, '').trim });
         if $strip-with.isa(Whatever) || $strip-with.isa(WhateverCode) {
+
+            # Strip enumeration
+            if @questions.elems > 1 {
+                @answers = @answers.map({ $_.subst(/ ^ \h* \d+ \h* $sep /, '').trim });
+            }
+
+            # For each answer remove "parasitic" words.
             for (^@questions.elems) -> $i {
                 # @answers[$i] = @answers[$i].split(/ <ws> /, :skip-empty).grep({ $_.lc ∉ $noWords }).join;
                 my @noWords = @questions[$i].split(/ <ws> /, :skip-empty)>>.lc.unique.Array;
@@ -200,11 +206,22 @@ multi sub Fetch(Str $text is copy,
                                 .subst(/ '.' $ /, '')
                         .trim;
             }
+
         } elsif $strip-with ~~ Positional && $strip-with.elems > 0 {
+
+            # Strip enumeration
+            if @questions.elems > 1 {
+                @answers = @answers.map({ $_.subst(/ ^ \h* \d+ \h* $sep /, '').trim });
+            }
+
+            # Derive list of words to be removed
             my @noWords = $strip-with.grep(*~~ Str).Array;
+
+            # Remove words
             for (^@questions.elems) -> $i {
                 @answers[$i] = reduce(-> $x, $w { $x.subst(/:i <wb> $w <wb>/, ''):g }, @answers[$i], |@noWords);
             }
+
         } elsif $strip-with ~~ Callable {
             for (^@questions.elems) -> $i {
                 @answers[$i] = $strip-with(@answers[$i]);
