@@ -46,4 +46,9 @@ my $text6 = "My color preferences are given by the following order: blue, red, g
 my $question6 = 'What is the favorite color?';
 ok find-textual-answer($text6, $question6, 3, :$llm, :$max-tokens, :$model, :$method, :$echo);
 
+## 7
+isa-ok find-textual-answer($text6, $question6, :$llm, :$max-tokens, :$model, :$method, :$echo),
+        Str,
+        'single string answer for single question';
+
 done-testing;
