@@ -10,7 +10,11 @@ unit module ML::FindTextualAnswer;
 our proto find-textual-answer($text, |) is export {*}
 
 multi sub find-textual-answer($text, $question, UInt $n = 1, *%args) {
-    return find-textual-answer($text, [$question,], $n, |%args);
+    my $res = find-textual-answer($text, [$question,], $n, |%args);
+    if $res ~~ Positional && $res.elems == 1 {
+        return $res.head;
+    }
+    return $res;
 }
 
 multi sub find-textual-answer($text,
