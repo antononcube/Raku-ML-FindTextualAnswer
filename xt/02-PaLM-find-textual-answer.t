@@ -41,4 +41,9 @@ isa-ok find-textual-answer($text2, @questions,
         :$echo).all ~~ Pair,
         True;
 
+## 6
+my $text6 = "My color preferences are given by the following order: blue, red, green, white, pink, cherry, light brown.";
+my $question6 = 'What is the favorite color?';
+ok find-textual-answer($text6, $question6, 3, :$llm, :$max-tokens, :$model, :$method, :$echo);
+
 done-testing;
