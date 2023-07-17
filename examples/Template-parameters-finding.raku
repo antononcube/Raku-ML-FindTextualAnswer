@@ -29,11 +29,11 @@ my @questions2 =
 
 my @answers2 = |find-textual-answer($query2, @questions,
         request => Whatever,
-        strip-with => Empty,
+        strip-with => Whatever,
         model => 'text-davinci-003',
         :!echo,
         temperature => 0.7,
-        max-tokens => 120, :p);
+        max-tokens => 120, :p, :echo);
 
 .say for @answers2;
 
