@@ -89,7 +89,7 @@ multi sub llm-classify(Str $text,
     my $question = @classLabels.pairs.map({ "{$_.key + 1}) {$_.value}" }).join("\n");
 
     # Process LLM arguments
-    my %llmArgs = %args , {llm => 'palm', request => 'which of these workflows characterizes it', strip-with => 'NONE'};
+    my %llmArgs = {llm => 'palm', request => 'which of these labels characterizes it', strip-with => Empty} , %args;
     %llmArgs = %llmArgs.grep({ $_.key ∉ <p pairs>});
 
     # Delegate
