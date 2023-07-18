@@ -99,7 +99,7 @@ multi sub Fetch(Str $text is copy,
     # Process llm
     #------------------------------------------------------
     if $llm.isa(Whatever) { $llm = 'openai'; }
-    die "The argument \$model is expected to be Whatever or one of { %llmModules.keys.join(', ') }."
+    die "The argument \$llm is expected to be Whatever or one of { %llmModules.keys.join(', ') }."
     unless $llm ∈ %llmModules.keys;
 
     #------------------------------------------------------
