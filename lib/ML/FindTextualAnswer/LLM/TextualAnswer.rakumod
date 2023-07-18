@@ -10,6 +10,8 @@ use WWW::PaLM::Models;
 use WWW::PaLM::GenerateText;
 use WWW::PaLM::GenerateMessage;
 
+use JSON::Fast;
+
 unit module ML::FindTextualAnswer::LLM::TextualAnswer;
 
 #===========================================================
@@ -54,6 +56,27 @@ our sub register-llm(Str :$llm!,
 }
 
 #===========================================================
+# Prompt engineering
+#===========================================================
+
+# This prompt was made for OpenAI / ChatGPT.
+# With ChatGPT openai-chat-completion has to be used.
+# With PaLM palm-generate-text has to be used.
+
+my $prompt = q:to/END/;
+The following text describes elements of a computational workflow.
+Answer the questions appropriate for computer programming processings.
+Answer the questions concisely.
+DO NOT use the workd "and" as list separator. Separate list elements with commas.
+DO NOT number the list or the items of the list.
+Try to put the question-answer pairs in JSON format.
+END
+
+sub default-prompt() is export {
+    return $prompt.subst('question-answer pairs', 'list of answers');
+}
+
+#===========================================================
 # FindTextualAnswer by LLM
 #===========================================================
 
@@ -66,6 +89,7 @@ our proto Fetch(Str $text,
                 :$strip-with = Empty,
                 :$prelude is copy = Whatever,
                 :$request is copy = Whatever,
+                :$prompt is copy = '',
                 Bool :p(:$pairs) = False,
                 |) is export {*}
 
@@ -77,9 +101,10 @@ multi sub Fetch(Str $text,
                 :$strip-with = Empty,
                 :$prelude is copy = Whatever,
                 :$request is copy = Whatever,
+                :$prompt is copy = '',
                 Bool :p(:$pairs) = False,
                 *%args) {
-    my $res = Fetch($text, [$question,], :$llm, :$sep, :$llm-model, :$strip-with, :$prelude, :$request, :$pairs, |%args);
+    my $res = Fetch($text, [$question,], :$llm, :$sep, :$llm-model, :$strip-with, :$prelude, :$request, :$prompt, :$pairs, |%args);
     return $res ~~ Positional ?? $res[0] !! $res;
 }
 
@@ -92,6 +117,7 @@ multi sub Fetch(Str $text is copy,
                 :$strip-with is copy = Whatever,
                 :$prelude is copy = Whatever,
                 :$request is copy = Whatever,
+                :$prompt is copy = '',
                 Bool :p(:$pairs) = False,
                 *%args) {
 
@@ -137,6 +163,14 @@ multi sub Fetch(Str $text is copy,
     unless $request ~~ Str;
 
     #------------------------------------------------------
+    # Process prompt
+    #------------------------------------------------------
+
+    if $prompt.isa(Whatever) { $prompt = default-prompt(); }
+    die "The argument \$prompt is expected to be a string or Whatever."
+    unless $prompt ~~ Str;
+
+    #------------------------------------------------------
     # Process echo
     #------------------------------------------------------
     my $echo = so %args<echo> // False;
@@ -145,7 +179,7 @@ multi sub Fetch(Str $text is copy,
     # Make query
     #------------------------------------------------------
 
-    my Str $query = $prelude ~ ' "' ~ $text ~ '" ' ~ $request;
+    my Str $query = $prompt ~ ' ' ~ $prelude ~ ' "' ~ $text ~ '" ' ~ $request;
 
     if @questions == 1 {
         $query ~= "\n{ @questions[0] }";
@@ -177,6 +211,16 @@ multi sub Fetch(Str $text is copy,
     #------------------------------------------------------
     # Process answers
     #------------------------------------------------------
+
+    # If the answer is a valid JSON parse it and return as a result
+    my $jsonRes;
+    try {
+        $jsonRes = from-json($res);
+    }
+
+    if !$! {
+        return $jsonRes;
+    }
 
     # Pick answers the are long enough.
     my @answers = [$res,];
