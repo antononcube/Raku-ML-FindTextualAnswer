@@ -67,9 +67,9 @@ my $prompt = q:to/END/;
 The following text describes elements of a computational workflow.
 Answer the questions appropriate for computer programming processings.
 Answer the questions concisely.
-DO NOT use the workd "and" as list separator. Separate list elements with commas.
+DO NOT use the word "and" as a list separator. Separate list elements with commas.
 DO NOT number the list or the items of the list.
-Try to put the question-answer pairs in JSON format.
+Put the question-answer pairs in JSON format.
 END
 
 sub default-prompt() is export {
