@@ -59,11 +59,19 @@ multi sub find-textual-answer($text,
 
 
 #===========================================================
-#| Finding substrings that appear to be answers of questions using a LLM.
+#| Finding substrings that appear to be answers of questions using an LLM.
 our proto llm-textual-answer(|) is export {*}
 
 multi sub llm-textual-answer(**@args, *%args) {
     ML::FindTextualAnswer::LLM::TextualAnswer::Fetch(|@args, |%args);
+}
+
+#===========================================================
+#| Creates an LLM function for finding textual answers.
+our proto llm-textual-answer-function(|) is export {*}
+
+multi sub llm-textual-answer-function(**@args, *%args) {
+    ML::FindTextualAnswer::LLM::TextualAnswer::Function(|@args, |%args);
 }
 
 
