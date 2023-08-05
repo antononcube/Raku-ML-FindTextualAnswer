@@ -25,8 +25,10 @@ Put the question-answer pairs in JSON object format.
 END
 
 sub default-prompt() is export {
+    #return $prompt.subst('question-answer pairs', 'list of answers');
     return $prompt.subst('question-answer pairs', 'list of answers');
 }
+
 
 #===========================================================
 # Pre-prepared LLM-functions
@@ -55,11 +57,20 @@ my &ftaPaLM =
 #| Make LLM-function for finding textual answers.
 our sub Function(:$prelude is copy = Whatever,
                  :$request is copy = Whatever,
+                 :$sep is copy = Whatever,
                  :form(:$formatron) is copy = Whatever,
                  :e(:$llm-evaluator) is copy = Whatever,
                  Bool :$pairs = False,
                  Bool :$echo = False
                  ) is export {
+
+    #------------------------------------------------------
+    # Process separator
+    #------------------------------------------------------
+
+    # What is the role/purpose of the separator?
+    if $sep.isa(Whatever) { $sep = ''; }
+    die "The argument \$sep is expected to be a string or Whatever" unless $sep ~~ Str;
 
     #------------------------------------------------------
     # Process prelude
@@ -131,6 +142,44 @@ our sub Function(:$prelude is copy = Whatever,
 
 
 #===========================================================
+# Post processing heuristics
+#===========================================================
+sub string-distance( Str $w1, Str $w2) {
+    +StrDistance.new(before => $w1, after => $w2)
+}
+
+our proto sub PostProcess(|) is export {*}
+
+multi sub PostProcess(@questions, @resultPairs) {
+
+    my @pairsToPass = @resultPairs.grep({ $_ ~~ Pair });
+    
+    die "The second argument is expected to be a list of pairs or Hash."
+    unless @resultPairs.all ~~ Pair;
+
+    return PostProcess(@questions, @resultPairs.Hash);
+}
+
+multi sub PostProcess(@questions, %result) {
+
+    die "The first argument is expected to be a list of strings."
+    unless @questions.all ~~ Str:D;
+
+    die "The second argument is expected to be a map of strings to strings."
+    unless %result.values.all ~~ Str:D;
+
+    # Find word candidates and distances for each question
+    my @dists = @questions.map( -> $q { $q => %result.keys.map( -> $k { $k => string-distance($q, $k) }).sort(*.value) });
+
+    # Pick the smallest distance candidate
+    my %qToResKey = @dists.map({ $_.key => $_.value.head.key });
+
+    # Return the original question to corresponding answer map.
+    return %qToResKey.map({ $_.key => %result{$_.value} }).Hash;
+}
+
+
+#===========================================================
 # FindTextualAnswer by LLM
 #===========================================================
 
@@ -178,7 +227,7 @@ multi sub Fetch(Str $text is copy,
     # Make LLM function
     #------------------------------------------------------
 
-    my &func = Function(:$llm-evaluator, :$formatron, :$echo);
+    my &func = Function(:$prelude, :$request, :$sep, :$llm-evaluator, :$formatron, :$echo);
 
     #------------------------------------------------------
     # Delegate
@@ -189,6 +238,8 @@ multi sub Fetch(Str $text is copy,
     #------------------------------------------------------
     # Process answers
     #------------------------------------------------------
+
+    $res = PostProcess(@questions, $res);
 
     return $res;
 }
