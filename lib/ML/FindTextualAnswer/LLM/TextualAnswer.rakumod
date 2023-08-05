@@ -122,8 +122,6 @@ our sub Function(:$prelude is copy = Whatever,
                 :$llm-evaluator,
                 :$formatron);
     } else {
-        note $llm-evaluator.raku;
-
         return llm-function(
                 { $prelude ~ "\n$^a\n" ~ &req($^b) },
                 :$llm-evaluator,
