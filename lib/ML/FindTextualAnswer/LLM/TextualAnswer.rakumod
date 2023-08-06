@@ -14,7 +14,7 @@ unit module ML::FindTextualAnswer::LLM::TextualAnswer;
 # With ChatGPT openai-chat-completion has to be used.
 # With PaLM palm-generate-text has to be used.
 
-my $prompt = q:to/END/;
+my $promptQAJSON = q:to/END/;
 You examine texts and can answers questions about them.
 Answer the questions appropriate for computer programming processings.
 Answer the questions concisely.
@@ -25,8 +25,8 @@ Put the question-answer pairs in JSON object format.
 END
 
 sub default-prompt() is export {
-    #return $prompt.subst('question-answer pairs', 'list of answers');
-    return $prompt.subst('question-answer pairs', 'list of answers');
+    #return $promptQAJSON.subst('question-answer pairs', 'list of answers');
+    return $promptQAJSON;
 }
 
 
@@ -81,6 +81,14 @@ our sub Function(:$prelude is copy = Whatever,
     unless $prelude ~~ Str;
 
     #------------------------------------------------------
+    # Process formatron
+    #------------------------------------------------------
+
+    if $formatron.isa(Whatever) && $llm-evaluator ~~ LLM::Functions::Evaluator {
+        $formatron = $llm-evaluator.formatron;
+    }
+
+    #------------------------------------------------------
     # Process request
     #------------------------------------------------------
 
@@ -113,11 +121,12 @@ our sub Function(:$prelude is copy = Whatever,
 
     if $pairs {
         $formatron = sub-parser('JSON');
-        $llm-evaluator = llm-evaluator($llm-evaluator);
         $llm-evaluator = llm-evaluator($llm-evaluator,
-                        conf => llm-configuration($llm-evaluator.conf, prompts => default-prompt, temperature => 0.01),
-                        :$formatron);
+                conf => llm-configuration($llm-evaluator.conf, prompts => default-prompt, temperature => 0.01,),
+                :$formatron);
     }
+
+    note "Evaluator object : { $llm-evaluator.raku }" if $echo;
 
     #------------------------------------------------------
     # LLM function
@@ -144,7 +153,7 @@ our sub Function(:$prelude is copy = Whatever,
 #===========================================================
 # Post processing heuristics
 #===========================================================
-sub string-distance( Str $w1, Str $w2) {
+sub string-distance(Str $w1, Str $w2) {
     +StrDistance.new(before => $w1, after => $w2)
 }
 
@@ -153,11 +162,11 @@ our proto sub PostProcess(|) is export {*}
 multi sub PostProcess(@questions, @resultPairs) {
 
     my @pairsToPass = @resultPairs.grep({ $_ ~~ Pair });
-    
-    die "The second argument is expected to be a list of pairs or Hash."
-    unless @resultPairs.all ~~ Pair;
 
-    return PostProcess(@questions, @resultPairs.Hash);
+    die "The second argument is expected to be a list with pairs or a Map object."
+    unless @pairsToPass.all ~~ Pair;
+
+    return PostProcess(@questions, @pairsToPass.Hash);
 }
 
 multi sub PostProcess(@questions, %result) {
@@ -169,7 +178,7 @@ multi sub PostProcess(@questions, %result) {
     unless %result.values.all ~~ Str:D;
 
     # Find word candidates and distances for each question
-    my @dists = @questions.map( -> $q { $q => %result.keys.map( -> $k { $k => string-distance($q, $k) }).sort(*.value) });
+    my @dists = @questions.map(-> $q { $q => %result.keys.map(-> $k { $k => string-distance($q, $k) }).sort(*.value) });
 
     # Pick the smallest distance candidate
     my %qToResKey = @dists.map({ $_.key => $_.value.head.key });
@@ -178,6 +187,10 @@ multi sub PostProcess(@questions, %result) {
     return %qToResKey.map({ $_.key => %result{$_.value} }).Hash;
 }
 
+multi sub PostProcess(@questions, $result) {
+    warn "Do not know how to process the second argument: { $result.raku }";
+    return $result;
+}
 
 #===========================================================
 # FindTextualAnswer by LLM
@@ -189,21 +202,24 @@ our proto Fetch(Str $text,
                 :$prelude is copy = Whatever,
                 :$request is copy = Whatever,
                 :$sep = Whatever,
-                :form(:$formatron) = 'Str',
+                :form(:$formatron) = Whatever,
                 :e(:$llm-evaluator) is copy = Whatever,
                 Bool :p(:$pairs) = False,
-                |) is export {*}
+                Bool :pp($post-process) = True,
+                Bool :$echo = False) is export {*}
 
 multi sub Fetch(Str $text,
                 Str $question,
                 :$prelude is copy = Whatever,
                 :$request is copy = Whatever,
                 :$sep = Whatever,
-                :form(:$formatron) = 'Str',
+                :form(:$formatron) = Whatever,
                 :e(:$llm-evaluator) is copy = Whatever,
                 Bool :p(:$pairs) = False,
-                *%args) {
-    my $res = Fetch($text, [$question,], :$prelude, :$request, :$sep, :$formatron, :$llm-evaluator);
+                Bool :pp($post-process) = True,
+                Bool :$echo = False) {
+    my $res = Fetch($text, [$question,], :$prelude, :$request, :$sep, :$formatron, :$llm-evaluator, :$pairs,
+            :$post-process, :$echo);
     return $res ~~ Positional ?? $res[0] !! $res;
 }
 
@@ -213,33 +229,33 @@ multi sub Fetch(Str $text is copy,
                 :$prelude is copy = Whatever,
                 :$request is copy = Whatever,
                 :$sep = Whatever,
-                :form(:$formatron) = 'St',
+                :form(:$formatron) = Whatever,
                 :e(:$llm-evaluator) is copy = Whatever,
                 Bool :p(:$pairs) = False,
-                *%args) {
-
-    #------------------------------------------------------
-    # Process echo
-    #------------------------------------------------------
-    my $echo = so %args<echo> // False;
+                Bool :pp($post-process) = True,
+                Bool :$echo = False) {
 
     #------------------------------------------------------
     # Make LLM function
     #------------------------------------------------------
 
-    my &func = Function(:$prelude, :$request, :$sep, :$llm-evaluator, :$formatron, :$echo);
+    my &func = Function(:$prelude, :$request, :$sep, :$formatron, :$llm-evaluator, :$pairs, :$echo);
 
     #------------------------------------------------------
-    # Delegate
+    # LLM function evaluation
     #------------------------------------------------------
 
     my $res = &func($text, @questions);
+
+    note "LLM response : {$res.raku}" if $echo;
 
     #------------------------------------------------------
     # Process answers
     #------------------------------------------------------
 
-    $res = PostProcess(@questions, $res);
+    if $pairs && $post-process {
+        $res = PostProcess(@questions, $res);
+    }
 
     return $res;
 }
