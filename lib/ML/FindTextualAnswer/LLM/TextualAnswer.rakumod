@@ -120,9 +120,15 @@ our sub Function(:$prelude is copy = Whatever,
     #------------------------------------------------------
 
     if $pairs {
+        my $conf = $llm-evaluator;
+
+        if $llm-evaluator ~~ LLM::Functions::Evaluator {
+            $conf = $llm-evaluator.conf
+        }
+
         $formatron = sub-parser('JSON');
         $llm-evaluator = llm-evaluator($llm-evaluator,
-                conf => llm-configuration($llm-evaluator.conf, prompts => default-prompt, temperature => 0.01,),
+                conf => llm-configuration($conf, prompts => default-prompt, temperature => 0.01,),
                 :$formatron);
     }
 
@@ -136,7 +142,7 @@ our sub Function(:$prelude is copy = Whatever,
         return llm-function(
                 {
                     my $query = $prelude ~ "\n$^a\n" ~ &req($^b);
-                    note "Query:", $query.raku;
+                    note "Query : ", $query.raku;
                     $query
                 },
                 :$llm-evaluator,
@@ -173,9 +179,6 @@ multi sub PostProcess(@questions, %result) {
 
     die "The first argument is expected to be a list of strings."
     unless @questions.all ~~ Str:D;
-
-    die "The second argument is expected to be a map of strings to strings."
-    unless %result.values.all ~~ Str:D;
 
     # Find word candidates and distances for each question
     my @dists = @questions.map(-> $q { $q => %result.keys.map(-> $k { $k => string-distance($q, $k) }).sort(*.value) });
