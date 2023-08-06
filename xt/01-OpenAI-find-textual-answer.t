@@ -26,7 +26,7 @@ ok find-textual-answer(
 ## 2
 my $text2 = 'make a classifier with the method RandomForest over the dataset dfTitanic; show accuracy and recall';
 my @questions2 = ['which method?', 'which dataset?', 'what metrics to display?'];
-ok find-textual-answer($text2, @questions2, finder =>  llm-evaluator($conf1));
+ok find-textual-answer($text2, @questions2, finder => llm-evaluator($conf1));
 
 ## 3
 ok find-textual-answer($text2, @questions2, request => 'answer the questions', finder => llm-evaluator($conf1));
