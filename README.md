@@ -6,11 +6,13 @@ This package provides function(s) for finding sub-strings in texts that appear t
 to given questions according to certain Machine Learning (ML) algorithms or
 Large Language Models (LLMs).
 
-**Remark:** Currently only LLMs are used via the packages "WWW::OpenAI", [AAp1], and "WWW::PaLM", [AAp2].
+**Remark:** Currently only LLMs are used via the packages "WWW::OpenAI", [AAp1], and "WWW::PaLM", [AAp2],
 
-**Remark:** One of the primary motivations for implementing this package is to have provide
+**Remark:** The LLMs are utilized via the packages "LLM::Functions", [AAp3], and "Text::SubParsers", [AAp4].
+
+**Remark:** One of the primary motivations for implementing this package is to provide
 the fundamental functionality of extracting parameter values from (domain specific) texts 
-needed for the implementation of "ML::NLPTemplateEngine", [AAp3].
+needed for the implementation of "ML::NLPTemplateEngine", [AAp5].
 
 -----
 
@@ -39,6 +41,7 @@ Here is an example of finding textual answers:
 
 ```perl6
 use ML::FindTextualAnswer;
+
 my $text = "Lake Titicaca is a large, deep lake in the Andes 
 on the border of Bolivia and Peru. By volume of water and by surface 
 area, it is the largest lake in South America";
@@ -46,7 +49,7 @@ area, it is the largest lake in South America";
 find-textual-answer($text, "Where is Titicaca?")
 ```
 ```
-# Titicaca is in Peru.
+# On the border of Bolivia and Peru.
 ```
 
 By default `find-textual-answer` tries to give short answers.
@@ -69,7 +72,7 @@ Here we get a longer answer by changing the value of "request":
 find-textual-answer($text, "Where is Titicaca?", request => "answer the question:")
 ```
 ```
-# Lake Titicaca is in Bolivia and Peru.
+# Titicaca is in the Andes on the border of Bolivia and Peru.
 ```
 
 **Remark:** The function `find-textual-answer` is inspired by the Mathematica function
@@ -103,21 +106,23 @@ $textCap.chars
 Here we ask a single question and request 3 answers:
 
 ```perl6
-find-textual-answer($textCap, 'Where lived?', 3, llm => 'palm')
+use LLM::Functions;
+
+find-textual-answer($textCap, 'Where lived?', 3, finder => llm-evaluator('palm'))
 ```
 ```
-# 1. United States
-# 2. Austrian Empire
+# 1. Austrian Empire
+# 2. United States
 # 3. New York
 ```
 
 Here is a rerun without number of answers argument:
 
 ```perl6
-find-textual-answer($textCap, 'Where lived?', llm => 'palm')
+find-textual-answer($textCap, 'Where lived?', finder => llm-evaluator('palm'))
 ```
 ```
-# United States
+# New York
 ```
 
 ### Multiple questions
@@ -158,25 +163,54 @@ a first line followed by the answers. In that situation the answers are not pars
 Here is example of requesting answers to multiple questions and specifying that result should be a list of pairs: 
 
 ```perl6
-my @res = |find-textual-answer($query, @questions, llm => 'palm', :pairs);
+my %res = find-textual-answer($query, @questions, finder => llm-evaluator('palm'), :pairs);
 
-.say for @res;
+.say for %res;
 ```
 ```
-# What is the dataset? => 1) dfTitanic
-# What is the method? => 2) RandomForest
-# Which metrics to show? => 3) precision, accuracy
+# What is the dataset? => dfTitanic
+# Which metrics to show? => [precision accuracy]
+# What is the method? => RandomForest
 ````
 
 -------
 
-## Registering new LLMs
+## LLM functions
 
-Upon installation the package "ML::FindTextualAnswer" knows how to access the LLMs ChatGPT and PaLM.
-(I.e. "ML::FindTextualAnswer" dependents on "WWW::OpenAI" and "WWW:PaLM".)
+This package, "ML::FindTextualAnswer", uses LLMs via the package "LLM::Functions".
 
-Other LLMs can be registered using `register-llm` of the module "ML::FindTextualAnswer::LLMFindTextualAnswer" --
-see the corresponding test file ["./xt/03-register-llm.t"](./xt/03-register-llm.t).
+Upon installation the package "LLM::Functions" knows how to access the LLMs ChatGPT and PaLM.
+(I.e. "LLM::Functions" dependents on "WWW::OpenAI" and "WWW:PaLM".)
+
+In some situations it would be preferable to have a pre-configured LLM function for finding 
+the textual answers. Such functions can be obtained with `llm-textual-answer-function`. 
+Here is an example:
+
+```perl6
+my &fta = llm-textual-answer-function(llm-evaluator => 'PaLM'):pairs;
+
+&fta($query, @questions)
+```
+```
+# {dataset => dfTitanic, method => RandomForest, metrics => [precision accuracy]}
+```
+
+That is roughly equivalent to making of the LLM function:
+
+```perl6
+use Text::SubParsers;
+use ML::FindTextualAnswer::LLM::TextualAnswer;
+
+my &fta2 =
+        llm-function(
+        { "Given the text: $^a \nAnswer the following questions:\n$^b." },
+                llm-evaluator => llm-configuration('PaLM', prompts => default-prompt),
+                form => sub-parser('JSON'));
+```
+```
+# -> **@args, *%args { #`(Block|3252657911440) ... }
+```
+
 
 -------
 
@@ -209,8 +243,9 @@ find-textual-answer --help
 
 ## Mermaid diagram
 
-The following flowchart corresponds to the steps in the package function `find-textual-answer` 
-with method "LLM" (which stands for "Large Language Models"):
+The following flowchart corresponds to the ***conceptual*** steps in the package function
+`find-textual-answer` with a finder spec that is an `LLM::Functions::Evaluator` object 
+("LLM" stands for "Large Language Models"):
 
 ```mermaid
 graph TD
@@ -245,6 +280,10 @@ graph TD
 	PJ --> TO
 ```
 
+At this point for "LLM finders" the functions `find-textual-answer` uses the function
+`ML::FindTextualAnswer::LLM::TextualAnswer::Fetch`, which, in turn, is based on the 
+the packages "LLM::Functions" and "Text::SubParsers". 
+
 --------
 
 ## TODO
@@ -254,8 +293,14 @@ graph TD
 - [X] DONE Heuristic for splitting and assigning multiple answers   
 - [X] DONE Separate functions:
   - [X] DONE `llm-find-textual-answer` 
+  - [X] DONE `llm-find-textual-answer-function` 
   - [X] DONE `llm-classify` 
+- [X] DONE Refactor using ["LLM::Functions"](https://github.com/antononcube/Raku-LLM-Functions)
+  - [X] DONE `Fetch`
+  - [X] DONE `llm-textual-answer`
+  - [X] DONE `llm-classify`
 - [ ] TODO Post-processing
+  - [X] DONE Implement post-processing of `sub-parser('JSON')` LLM function calls.
   - [ ] TODO Implement grammar-based post processing
     - This requires investigating a fair amount of cases.
 - [ ] TODO CLI
@@ -314,6 +359,16 @@ Wolfram Language function, https://reference.wolfram.com/language/ref/FindTextua
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp3] Anton Antonov,
+[LLM::Functions Raku package](https://github.com/antononcube/Raku-LLM-Functions),
+(2023),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp4] Anton Antonov,
+[Text::SubParsers Raku package](https://github.com/antononcube/Raku-Text-SubParsers),
+(2023),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp5] Anton Antonov,
 [ML::NLPTemplateEngine Raku package](https://github.com/antononcube/Raku-ML-NLPTemplateEngines),
 (2023),
 [GitHub/antononcube](https://github.com/antononcube).
