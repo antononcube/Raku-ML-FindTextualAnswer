@@ -1,0 +1,31 @@
+use v6.d;
+use Test;
+
+use lib '.';
+use lib './lib';
+
+use ML::FindTextualAnswer::LLM::TextualAnswer;
+
+
+## 1
+my @qs1 = ["Lived where?", "Worked where?", "What profession?"];
+my %res1 = Lived => 'Austrian Empire, United States', Profession => 'Engineer, physicist',
+           Worked => 'Continental Edison, Edison Machine Works';
+my %ppRes1 = Hash(@qs1 Z=> %res1<Lived Worked Profession>);
+
+ok ML::FindTextualAnswer::LLM::TextualAnswer::PostProcess(@qs1, %res1);
+
+## 2
+is-deeply ML::FindTextualAnswer::LLM::TextualAnswer::PostProcess(@qs1, %res1), %ppRes1;
+
+## 3
+is-deeply ML::FindTextualAnswer::LLM::TextualAnswer::PostProcess(@qs1, %res1.pairs), %ppRes1;
+
+## 4
+my @qs4 = <Generic Tuition College>;
+my $res4 = ['```json', 'generic' => 'subject', 'tuition' => '2mil', 'college' => 'bad', '```'];
+my %ppRes4 = Hash(@qs4 Z=> <subject 2mil bad>);
+
+is-deeply ML::FindTextualAnswer::LLM::TextualAnswer::PostProcess(@qs4, $res4), %ppRes4;
+
+done-testing;
