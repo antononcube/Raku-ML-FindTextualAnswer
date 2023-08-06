@@ -205,7 +205,7 @@ our proto Fetch(Str $text,
                 :form(:$formatron) = Whatever,
                 :e(:$llm-evaluator) is copy = Whatever,
                 Bool :p(:$pairs) = False,
-                Bool :pp($post-process) = True,
+                Bool :pp(:$post-process) = True,
                 Bool :$echo = False) is export {*}
 
 multi sub Fetch(Str $text,
@@ -216,10 +216,9 @@ multi sub Fetch(Str $text,
                 :form(:$formatron) = Whatever,
                 :e(:$llm-evaluator) is copy = Whatever,
                 Bool :p(:$pairs) = False,
-                Bool :pp($post-process) = True,
+                Bool :pp(:$post-process) = True,
                 Bool :$echo = False) {
-    my $res = Fetch($text, [$question,], :$prelude, :$request, :$sep, :$formatron, :$llm-evaluator, :$pairs,
-            :$post-process, :$echo);
+    my $res = Fetch($text, [$question,], :$prelude, :$request, :$sep, :$formatron, :$llm-evaluator, :$pairs, :$post-process, :$echo);
     return $res ~~ Positional ?? $res[0] !! $res;
 }
 
@@ -232,7 +231,7 @@ multi sub Fetch(Str $text is copy,
                 :form(:$formatron) = Whatever,
                 :e(:$llm-evaluator) is copy = Whatever,
                 Bool :p(:$pairs) = False,
-                Bool :pp($post-process) = True,
+                Bool :pp(:$post-process) = True,
                 Bool :$echo = False) {
 
     #------------------------------------------------------
