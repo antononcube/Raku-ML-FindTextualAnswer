@@ -97,15 +97,13 @@ $textCap.chars
 Here we ask a single question and request 3 answers:
 
 ```perl6
-use LLM::Functions;
-
-find-textual-answer($textCap, 'Where lived?', 3, finder => llm-evaluator('palm'))
+find-textual-answer($textCap, 'Where lived?', 3, finder => 'PaLM')
 ```
 
 Here is a rerun without number of answers argument:
 
 ```perl6
-find-textual-answer($textCap, 'Where lived?', finder => llm-evaluator('palm'))
+find-textual-answer($textCap, 'Where lived?', finder => 'PaLM')
 ```
 
 ### Multiple questions
@@ -143,7 +141,7 @@ a first line followed by the answers. In that situation the answers are not pars
 Here is example of requesting answers to multiple questions and specifying that result should be a list of pairs: 
 
 ```perl6
-my %res = find-textual-answer($query, @questions, finder => llm-evaluator('palm'), :pairs);
+my %res = find-textual-answer($query, @questions, finder => 'PaLM', :pairs);
 
 .say for %res;
 ````
@@ -170,6 +168,7 @@ my &fta = llm-textual-answer-function(llm-evaluator => 'PaLM'):pairs;
 That is roughly equivalent to making of the LLM function:
 
 ```perl6
+use LLM::Functions;
 use Text::SubParsers;
 use ML::FindTextualAnswer::LLM::TextualAnswer;
 
@@ -189,6 +188,12 @@ The package provides a CLI script for finding textual answers:
 
 ```shell
 find-textual-answer --help
+```
+
+Here is an example invocation:
+
+```shell
+find-textual-answer 'Colors in preference order: blue, red, green, white, pink, cherry, light brown.' -q='What is the favorite color?'
 ```
 
 --------

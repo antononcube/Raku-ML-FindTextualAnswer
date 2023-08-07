@@ -72,7 +72,7 @@ Here we get a longer answer by changing the value of "request":
 find-textual-answer($text, "Where is Titicaca?", request => "answer the question:")
 ```
 ```
-# Titicaca is in the Andes on the border of Bolivia and Peru.
+# Titicaca is located in the Andes on the border of Bolivia and Peru.
 ```
 
 **Remark:** The function `find-textual-answer` is inspired by the Mathematica function
@@ -106,23 +106,21 @@ $textCap.chars
 Here we ask a single question and request 3 answers:
 
 ```perl6
-use LLM::Functions;
-
-find-textual-answer($textCap, 'Where lived?', 3, finder => llm-evaluator('palm'))
+find-textual-answer($textCap, 'Where lived?', 3, finder => 'PaLM')
 ```
 ```
 # 1. Austrian Empire
 # 2. United States
-# 3. New York
+# 3. New York City
 ```
 
 Here is a rerun without number of answers argument:
 
 ```perl6
-find-textual-answer($textCap, 'Where lived?', finder => llm-evaluator('palm'))
+find-textual-answer($textCap, 'Where lived?', finder => 'PaLM')
 ```
 ```
-# New York
+# United States
 ```
 
 ### Multiple questions
@@ -163,7 +161,7 @@ a first line followed by the answers. In that situation the answers are not pars
 Here is example of requesting answers to multiple questions and specifying that result should be a list of pairs: 
 
 ```perl6
-my %res = find-textual-answer($query, @questions, finder => llm-evaluator('palm'), :pairs);
+my %res = find-textual-answer($query, @questions, finder => 'PaLM', :pairs);
 
 .say for %res;
 ```
@@ -198,6 +196,7 @@ my &fta = llm-textual-answer-function(llm-evaluator => 'PaLM'):pairs;
 That is roughly equivalent to making of the LLM function:
 
 ```perl6
+use LLM::Functions;
 use Text::SubParsers;
 use ML::FindTextualAnswer::LLM::TextualAnswer;
 
@@ -208,7 +207,7 @@ my &fta2 =
                 form => sub-parser('JSON'));
 ```
 ```
-# -> **@args, *%args { #`(Block|3252657911440) ... }
+# -> **@args, *%args { #`(Block|5804792039352) ... }
 ```
 
 
@@ -223,20 +222,29 @@ find-textual-answer --help
 ```
 ```
 # Usage:
-#   find-textual-answer [<words> ...] [-q|--questions=<Str>] [--llm=<Str>] [--mt|--max-tokens[=UInt]] [-m|--llm-model=<Str>] [-t|--temperature[=Real]] [-r|--request=<Str>] [-p|--pairs] [-a|--auth-key=<Str>] [--timeout[=UInt]] [--echo] [-f|--format=<Str>] [--method=<Str>] -- Command given as a sequence of words.
+#   find-textual-answer [<words> ...] -q|--questions=<Str> [--llm=<Str>] [--mt|--max-tokens[=UInt]] [--temp|--temperature[=Real]] [-r|--request=<Str>] [-p|--pairs] [-a|--auth-key=<Str>] [--timeout[=UInt]] [--echo] [-f|--format=<Str>] [--method=<Str>] -- Command given as a sequence of words.
 #   
-#     -q|--questions=<Str>        Questions separated with '?' or ';'.
-#     --llm=<Str>                 Large Language Model, one of 'openai', 'palm', or 'Whatever'. [default: 'Whatever']
-#     --mt|--max-tokens[=UInt]    The maximum number of tokens to generate in the completion. [default: 300]
-#     -m|--llm-model=<Str>        Model. [default: 'Whatever']
-#     -t|--temperature[=Real]     Temperature. [default: 0.7]
-#     -r|--request=<Str>          Request. [default: 'Whatever']
-#     -p|--pairs                  Should question-answer pairs be returned or not? [default: False]
-#     -a|--auth-key=<Str>         Authorization key (to use OpenAI API.) [default: 'Whatever']
-#     --timeout[=UInt]            Timeout. [default: 10]
-#     --echo                      Should the query, result, answer be echoed or not? [default: False]
-#     -f|--format=<Str>           Format of the result; one of "json", "hash", "values", or "Whatever". [default: 'values']
-#     --method=<Str>              Method for the HTTP POST query; one of "tiny" or "curl". [default: 'tiny']
+#     [<words> ...]                  Text to be questioned.
+#     -q|--questions=<Str>           Questions separated with '?' or ';'.
+#     --llm=<Str>                    Large Language Model, one of 'openai', 'palm', or 'Whatever'. [default: 'Whatever']
+#     --mt|--max-tokens[=UInt]       The maximum number of tokens to generate in the completion. [default: 300]
+#     --temp|--temperature[=Real]    Temperature. [default: 0.7]
+#     -r|--request=<Str>             Request. [default: 'Whatever']
+#     -p|--pairs                     Should question-answer pairs be returned or not? [default: False]
+#     -a|--auth-key=<Str>            Authorization key (to use OpenAI API.) [default: 'Whatever']
+#     --timeout[=UInt]               Timeout. [default: 10]
+#     --echo                         Should the query, result, answer be echoed or not? [default: False]
+#     -f|--format=<Str>              Format of the result; one of "json", "hash", "values", or "Whatever". [default: 'values']
+#     --method=<Str>                 Method for the HTTP POST query; one of "tiny" or "curl". [default: 'tiny']
+```
+
+Here is an example invocation:
+
+```shell
+find-textual-answer 'Colors in preference order: blue, red, green, white, pink, cherry, light brown.' -q='What is the favorite color?'
+```
+```
+# Blue.
 ```
 
 --------
