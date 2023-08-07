@@ -7,13 +7,13 @@ use lib './lib';
 use ML::FindTextualAnswer;
 
 my $llm = 'palm';
-my $model = Whatever; #'text-davinci-003';
 
 my $textShort = "Colors in preferences order : blue, red, green, white, pink, cherry, light brown.";
 my $question = 'What is the favorite color?';
-say "Single answer : ", find-textual-answer($textShort, $question, temperature => 0.5, :$llm);
-say "Three answers : ", find-textual-answer($textShort, $question, 3, :$llm, max-tokens => 120).raku;
+say "Single answer : ", find-textual-answer($textShort, $question, finder => $llm);
+say "Three answers : ", find-textual-answer($textShort, $question, 3, finder => $llm);
 
+#========================================================================================================================
 say "=" x 120;
 
 my $textLong = q:to/END/;
@@ -39,13 +39,9 @@ my @questions =
         ];
 
 my $res =
-        find-textual-answer($textLong, @questions, 3,
-                :$llm,
-                :$model,
-                temperature => 0.75,
-                max-output-tokens => 400):pairs:!echo;
+        find-textual-answer($textLong, @questions, 3, finder => $llm):pairs:!echo;
 
-if $res ~~ Positional {
+if $res ~~ Positional || $res ~~ Map {
     .say for |$res;
 } else {
     say $res;
