@@ -5,6 +5,7 @@ use lib '.';
 use lib './lib';
 
 use ML::FindTextualAnswer;
+use LLM::Functions;
 use JSON::Fast;
 
 my @queries = [
@@ -19,7 +20,7 @@ my @wkflTypes = ('Classification', 'Latent Semantic Analysis', 'Quantile Regress
 say "{ '=' x 10 } Using PaLM { '=' x 100 }";
 for @queries {
     say $_;
-    say llm-classify($_, @wkflTypes, llm => 'palm'):!echo;
+    say llm-classify($_, @wkflTypes, llm-evaluator => llm-configuration('palm')):echo;
     say '-' x 60;
 }
 
@@ -27,6 +28,6 @@ for @queries {
 say "{ '=' x 10 } Using OpenAI { '=' x 98 }";
 for @queries {
     say $_;
-    say llm-classify($_, @wkflTypes, llm => 'openai');
+    say llm-classify($_, @wkflTypes, llm-evaluator => llm-configuration('openai', model => 'text-davinci-003'));
     say '-' x 60;
 }

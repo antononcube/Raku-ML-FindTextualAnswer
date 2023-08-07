@@ -5,7 +5,7 @@ use lib '.';
 use lib './lib';
 
 use ML::FindTextualAnswer;
-use JSON::Fast;
+use LLM::Functions;
 
 my $query = 'Make a classifier with the method RandomForest over the data dfTitanic; show precision and accuracy; plot True Positive Rate vs Positive Predictive Value.';
 my $query2 = 'make a classifier with the method RandomForest over the dataset dfTitanic; show accuracy and recall';
@@ -24,18 +24,18 @@ my @questions2 =
          "Which metrics to show?"
         ];
 
-#my @answers = |find-textual-answer($query, @questions, strip-with => Empty, model => 'gpt-3.5-turbo', max-tokens => 120);
-#.say for @answers;
 
-my @answers2 = |find-textual-answer($query2, @questions,
-        request => Whatever,
-        strip-with => Whatever,
-        model => 'text-davinci-003',
-        :!echo,
-        temperature => 0.7,
-        max-tokens => 120, :p, :echo);
+my @answers = |find-textual-answer($query, @questions, request => Whatever, prompt => Whatever, finder => llm-evaluator('PaLM'));
 
-.say for @answers2;
+.say for @answers;
+
+#========================================================================================================================
+
+say '=' x 120;
+
+my %answers2 = find-textual-answer($query2, @questions2, request => Whatever, prompt => Whatever,  finder => llm-evaluator('OpenAI')):pairs;
+
+.say for %answers2;
 
 
 #`[
