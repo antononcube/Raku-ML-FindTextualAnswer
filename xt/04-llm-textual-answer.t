@@ -26,8 +26,9 @@ ok llm-textual-answer($text2, @questions);
 ok llm-textual-answer($text2, @questions, request => 'answer the questions', :$llm-evaluator, :$echo);
 
 ## 4
+# This is expected to fail because LLM evaluator made with 'PaLM' "knows" only text completion models.
 my $res4 = llm-textual-answer($text2, 'Which dataset?', llm-evaluator => llm-evaluator($llm-evaluator, model => 'chat-bison-001'), :$echo);
-isa-ok $res4, Hash;
+is $res4 ~~ Pair && $res4.key eq 'error', True;
 
 ## 5
 is-deeply $res4.keys.Array, ['error',];
