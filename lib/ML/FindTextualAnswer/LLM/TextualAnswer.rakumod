@@ -16,12 +16,13 @@ unit module ML::FindTextualAnswer::LLM::TextualAnswer;
 
 my $promptQAJSON = q:to/END/;
 You examine texts and can answers questions about them.
-Answer the questions appropriate for computer programming processings.
+The answers you give are amenable for further computer programming processing.
 Answer the questions concisely.
-DO NOT use the word "and" as a list separator. Separate list elements with commas.
+DO NOT use the word "and" as a list separator. Separate list elements only with commas.
 DO NOT number the list or the items of the list.
-Your responses should in the form of question and answer pairs.
-Put the question-answer pairs in JSON object format.
+When possible give numerical results.
+Your responses should be in the form of question-answer pairs.
+Put the question-answer pairs in a JSON object format.
 END
 
 sub default-prompt() is export {
@@ -191,6 +192,9 @@ multi sub PostProcess(@questions, %result) {
 }
 
 multi sub PostProcess(@questions, $result) {
+    if @questions.elems == 1 && $result ~~ Str:D {
+        return PostProcess(@questions, %(@questions.head => $result));
+    }
     warn "Do not know how to process the second argument: { $result.raku }";
     return $result;
 }
