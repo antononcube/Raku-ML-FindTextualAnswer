@@ -104,29 +104,44 @@ multi sub llm-textual-answer-function(**@args, *%args) {
 
 #===========================================================
 #| Classifies given text into given given labels using an LLM.
-our proto llm-classify(Str $text, @classLabels, :$llm-evaluator, Bool :$echo = False) is export {*}
+our proto llm-classify($text, @classLabels, :$llm-evaluator = Whatever, *%args) is export {*}
+
+multi sub llm-classify(@texts,
+                       @classLabels is copy,
+                       :$llm-evaluator is copy = Whatever,
+                       *%args
+                       ) {
+    return @texts.map({ llm-classify($_, @classLabels, :$llm-evaluator, |%args)});
+}
 
 multi sub llm-classify(Str $text,
                        @classLabels is copy,
-                       :$llm-evaluator = Whatever,
-                       Bool :$echo = False) {
+                       :e($llm-evaluator) is copy = Whatever,
+                       *%args
+                       ) {
 
     # Make string
     @classLabels = @classLabels>>.Str;
 
-
     # Single question
     my $question = @classLabels.pairs.map({ "{ $_.key + 1 }) { $_.value }" }).join("\n");
 
-    # Process LLM arguments
-    my %llmArgs = :$llm-evaluator, request => 'which of these labels characterizes it:';
+    # Echo arg
+    my $echo = %args<echo> // False;
 
     # Delegate
     my $res = llm-textual-answer($text, $question, :$llm-evaluator, request => 'which of these labels characterizes it:'):!pairs;
 
+    # Echo delegation result
+    note "llm-textual-answer result: ", $res.raku if $echo;
+
+    # We do not handle multiple classification labels yet.
+    # Mostly, because LLMs currently do not return probabilities of the answers in a meaningful way.
+    if $res ~~ Iterable && $res.elems > 0 { $res = $res.head }
+
     # Process result
     my $resLbl = do given $res {
-        when $_ ~~ / ^ (\d+) / {
+        when $_ ~~ Str:D && $_.trim ~~ / ^ (\d+) / {
             my $index = $0.Str.Int;
 
             note "Index : $index" if $echo;
