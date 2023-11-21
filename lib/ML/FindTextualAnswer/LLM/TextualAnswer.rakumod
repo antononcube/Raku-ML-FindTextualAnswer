@@ -21,6 +21,7 @@ Answer the questions concisely.
 DO NOT use the word "and" as a list separator. Separate list elements only with commas.
 DO NOT number the list or the items of the list.
 When possible give numerical results.
+If a question is not applicable give "N/A" as its answer.
 Your responses should be in the form of question-answer pairs.
 Put the question-answer pairs in a JSON object format.
 END
