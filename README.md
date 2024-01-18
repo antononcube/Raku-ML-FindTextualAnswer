@@ -49,7 +49,7 @@ area, it is the largest lake in South America";
 find-textual-answer($text, "Where is Titicaca?")
 ```
 ```
-# On the border of Bolivia and Peru.
+# Lake Titicaca is on the border of Bolivia and Peru.
 ```
 
 By default `find-textual-answer` tries to give short answers.
@@ -72,7 +72,7 @@ Here we get a longer answer by changing the value of "request":
 find-textual-answer($text, "Where is Titicaca?", request => "answer the question:")
 ```
 ```
-# Titicaca is located in the Andes on the border of Bolivia and Peru.
+# Titicaca is located in the Andes, on the border of Bolivia and Peru.
 ```
 
 **Remark:** The function `find-textual-answer` is inspired by the Mathematica function
@@ -111,7 +111,7 @@ find-textual-answer($textCap, 'Where lived?', 3, finder => 'PaLM')
 ```
 # 1. Austrian Empire
 # 2. United States
-# 3. New York City
+# 3. New York
 ```
 
 Here is a rerun without number of answers argument:
@@ -166,9 +166,9 @@ my %res = find-textual-answer($query, @questions, finder => 'PaLM', :pairs);
 .say for %res;
 ```
 ```
-# What is the dataset? => dfTitanic
 # Which metrics to show? => [precision accuracy]
 # What is the method? => RandomForest
+# What is the dataset? => dfTitanic
 ````
 
 -------
@@ -207,7 +207,7 @@ my &fta2 =
                 form => sub-parser('JSON'));
 ```
 ```
-# -> **@args, *%args { #`(Block|5804792039352) ... }
+# -> **@args, *%args { #`(Block|3613591096848) ... }
 ```
 
 
@@ -244,7 +244,7 @@ Here is an example invocation:
 find-textual-answer 'Colors in preference order: blue, red, green, white, pink, cherry, light brown.' -q='What is the favorite color?'
 ```
 ```
-# Blue.
+# The favorite color is blue.
 ```
 
 --------
