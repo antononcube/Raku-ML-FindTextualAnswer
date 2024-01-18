@@ -15,7 +15,7 @@ unit module ML::FindTextualAnswer::LLM::TextualAnswer;
 # With PaLM palm-generate-text has to be used.
 
 my $promptQAJSON = q:to/END/;
-You examine texts and can answers questions about them.
+You examine texts and answer questions about them.
 The answers you give are amenable for further computer programming processing.
 Answer the questions concisely.
 DO NOT use the word "and" as a list separator. Separate list elements only with commas.
@@ -24,6 +24,7 @@ When possible give numerical results.
 If a question is not applicable give "N/A" as its answer.
 Your responses should be in the form of question-answer pairs.
 Put the question-answer pairs in a JSON object format.
+In the result JSON object the questions are the keys, the answers are the values.
 END
 
 sub default-prompt() is export {
@@ -36,7 +37,7 @@ sub default-prompt() is export {
 # Pre-prepared LLM-functions
 #===========================================================
 
-my $confOpenAI = llm-configuration('OpenAI');
+my $confOpenAI = llm-configuration('ChatGPT', model => 'gpt-3.5-turbo');
 my $confPaLM = llm-configuration('PaLM');
 
 my &ftaOpenAI =
@@ -128,9 +129,9 @@ our sub Function(:$prelude is copy = Whatever,
             $conf = $llm-evaluator.conf
         }
 
-        $formatron = sub-parser('JSON');
+        $formatron = sub-parser('JSON', :drop);
         $llm-evaluator = llm-evaluator($llm-evaluator,
-                conf => llm-configuration($conf, prompts => default-prompt, temperature => 0.01,),
+                conf => llm-configuration($conf, prompts => default-prompt(), temperature => 0.01),
                 :$formatron);
     }
 
