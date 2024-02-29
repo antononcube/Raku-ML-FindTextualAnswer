@@ -1,7 +1,7 @@
 {
   "name": "ML::FindTextualAnswer",
   "description": "ML::FindTextualAnswer provides function(s) for finding sub-strings in given text that appear to answer given questions.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "perl": "6.*",
   "authors": [
     "Anton Antonov"
