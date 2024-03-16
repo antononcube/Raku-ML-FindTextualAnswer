@@ -39,7 +39,7 @@ multi sub find-textual-answer($text,
         default { $finder }
     }
 
-    die "The value of \$finder is expected to be Whatever, an LLM::Functions::Evaluator object, or one of 'LLM', 'PaLM', 'ChatPaLM', 'OpenAI', 'ChatGPT', 'MistralAI', or 'Llama'."
+    die "The value of \$finder is expected to be Whatever, an LLM::Functions::Evaluator object, or one of 'LLM', 'PaLM', 'ChatPaLM', 'OpenAI', 'ChatGPT', 'MistralAI', or 'LLaMA'."
     unless $finder ~~ LLM::Functions::Evaluator || $finder ~~ Callable;
 
     # Find Fetch known parameters
