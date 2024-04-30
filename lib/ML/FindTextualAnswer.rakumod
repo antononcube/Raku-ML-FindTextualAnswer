@@ -32,14 +32,14 @@ multi sub find-textual-answer($text,
         when $finder ~~ Str:D && $finder.lc ∈ <llm large-language-model largelanguagemodel> {
             llm-evaluator(Whatever)
         }
-        when $finder ~~ Str:D && $finder.lc ∈ <openai chatgpt palm chatpalm mistralai llama> {
+        when $finder ~~ Str:D && $finder.lc ∈ <openai chatgpt palm chatpalm gemini chatgemini mistralai llama> {
             llm-evaluator($finder)
         }
         when Whatever { llm-evaluator(Whatever) }
         default { $finder }
     }
 
-    die "The value of \$finder is expected to be Whatever, an LLM::Functions::Evaluator object, or one of 'LLM', 'PaLM', 'ChatPaLM', 'OpenAI', 'ChatGPT', 'MistralAI', or 'LLaMA'."
+    die "The value of \$finder is expected to be Whatever, an LLM::Functions::Evaluator object, or one of 'LLM', 'PaLM', 'ChatPaLM', 'Gemini', 'ChatGemini', 'OpenAI', 'ChatGPT', 'MistralAI', or 'LLaMA'."
     unless $finder ~~ LLM::Functions::Evaluator || $finder ~~ Callable;
 
     # Find Fetch known parameters
