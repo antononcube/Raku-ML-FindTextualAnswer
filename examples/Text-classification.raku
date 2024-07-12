@@ -1,8 +1,7 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib '.';
-use lib './lib';
+use lib <. lib>;
 
 use ML::FindTextualAnswer;
 use LLM::Functions;
@@ -17,10 +16,10 @@ my @queries = [
 
 my @wkflTypes = ('Classification', 'Latent Semantic Analysis', 'Quantile Regression', 'Recommendations').sort;
 
-say "{ '=' x 10 } Using PaLM { '=' x 100 }";
+say "{ '=' x 10 } Using Gemini { '=' x 100 }";
 for @queries {
     say $_;
-    say llm-classify($_, @wkflTypes, llm-evaluator => llm-configuration('palm')):echo;
+    say llm-classify($_, @wkflTypes, epilog => '', llm-evaluator => llm-configuration('gemini')):echo;
     say '-' x 60;
 }
 
@@ -28,6 +27,6 @@ for @queries {
 say "{ '=' x 10 } Using OpenAI { '=' x 98 }";
 for @queries {
     say $_;
-    say llm-classify($_, @wkflTypes, llm-evaluator => llm-configuration('openai', model => 'text-davinci-003'));
+    say llm-classify($_, @wkflTypes, llm-evaluator => llm-configuration('openai', model => 'gpt-3.5-turbo'));
     say '-' x 60;
 }
