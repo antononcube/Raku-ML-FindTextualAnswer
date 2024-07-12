@@ -104,19 +104,24 @@ multi sub llm-textual-answer-function(**@args, *%args) {
 
 #===========================================================
 #| Classifies given text into given given labels using an LLM.
-our proto llm-classify($text, @classLabels, :$llm-evaluator = Whatever, *%args) is export {*}
+our proto llm-classify($text, @classLabels,
+                       :$llm-evaluator = Whatever,
+                       :$epilog = Whatever,
+                       *%args) is export {*}
 
 multi sub llm-classify(@texts,
                        @classLabels is copy,
                        :$llm-evaluator is copy = Whatever,
+                       :$epilog = Whatever,
                        *%args
                        ) {
-    return @texts.map({ llm-classify($_, @classLabels, :$llm-evaluator, |%args)});
+    return @texts.map({ llm-classify($_, @classLabels, :$llm-evaluator, :$epilog, |%args)});
 }
 
 multi sub llm-classify(Str $text,
                        @classLabels is copy,
                        :e($llm-evaluator) is copy = Whatever,
+                       :$epilog = Whatever,
                        *%args
                        ) {
 
@@ -126,11 +131,23 @@ multi sub llm-classify(Str $text,
     # Single question
     my $question = @classLabels.pairs.map({ "{ $_.key + 1 }) { $_.value }" }).join("\n");
 
+    if $epilog.isa(Whatever) {
+        $question ~= "\nYour answer should have one of the labels and nothing else.";
+    } elsif $epilog ~~ Str:D {
+        $question ~= $epilog;
+    } else {
+        die 'The argument $epilog is expected to be a string or Whatever.';
+    }
+
     # Echo arg
     my $echo = %args<echo> // False;
 
     # Delegate
-    my $res = llm-textual-answer($text, $question, :$llm-evaluator, request => 'which of these labels characterizes it:'):!pairs;
+    my $res = llm-textual-answer($text, $question,
+            :$llm-evaluator,
+            :$echo,
+            request => 'which of these labels characterizes it:',
+            :!pairs);
 
     # Echo delegation result
     note "llm-textual-answer result: ", $res.raku if $echo;
