@@ -61,6 +61,8 @@ my &ftaPaLM =
 our sub Function(:$prelude is copy = Whatever,
                  :$request is copy = Whatever,
                  :$sep is copy = Whatever,
+                 :$sep-text-begin is copy = Whatever,
+                 :$sep-text-end is copy = Whatever,
                  :form(:$formatron) is copy = Whatever,
                  :e(:$llm-evaluator) is copy = Whatever,
                  Bool :$pairs = False,
@@ -73,7 +75,16 @@ our sub Function(:$prelude is copy = Whatever,
 
     # What is the role/purpose of the separator?
     if $sep.isa(Whatever) { $sep = ''; }
-    die "The argument \$sep is expected to be a string or Whatever" unless $sep ~~ Str;
+    die "The argument \$sep is expected to be a string or Whatever."
+    unless $sep ~~ Str:D;
+
+    if $sep-text-begin.isa(Whatever) { $sep-text-begin = "\n```text\n"; }
+    die "The argument \$text-sep-begin is expected to be a string or Whatever."
+    unless $sep-text-begin ~~ Str:D;
+
+    if $sep-text-end.isa(Whatever) { $sep-text-end = "\n```\n"; }
+    die "The argument \$sep is expected to be a string or Whatever."
+    unless $sep-text-end ~~ Str:D;
 
     #------------------------------------------------------
     # Process prelude
@@ -144,7 +155,7 @@ our sub Function(:$prelude is copy = Whatever,
     if $echo {
         return llm-function(
                 {
-                    my $query = $prelude ~ "\n$^a\n" ~ &req($^b);
+                    my $query = $prelude ~ $sep-text-begin ~ $^a ~ $sep-text-end ~ &req($^b);
                     note "Query : ", $query.raku;
                     $query
                 },
@@ -152,7 +163,7 @@ our sub Function(:$prelude is copy = Whatever,
                 :$formatron);
     } else {
         return llm-function(
-                { $prelude ~ "\n$^a\n" ~ &req($^b) },
+                { $prelude ~ $sep-text-begin ~ $^a ~ $sep-text-end ~ &req($^b) },
                 :$llm-evaluator,
                 :$formatron);
     }
