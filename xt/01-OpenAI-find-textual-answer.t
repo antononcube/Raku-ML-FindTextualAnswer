@@ -32,7 +32,7 @@ ok find-textual-answer($text2, @questions2, finder => llm-evaluator($conf1));
 ok find-textual-answer($text2, @questions2, request => 'answer the questions', finder => llm-evaluator($conf1));
 
 ## 4
-ok find-textual-answer($text2, 'Which dataset?', finder => llm-evaluator(llm-configuration($conf1, model => 'gpt-3.5-turbo-0301')));
+ok find-textual-answer($text2, 'Which dataset?', finder => llm-evaluator(llm-configuration($conf2, model => 'gpt-3.5-turbo-1106')));
 
 ## 5
 isa-ok find-textual-answer($text2, @questions2, finder => llm-evaluator($conf2)):pairs, Hash;
