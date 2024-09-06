@@ -183,6 +183,9 @@ multi sub PostProcess(@questions, %result) {
     die "The first argument is expected to be a list of strings."
     unless @questions.all ~~ Str:D;
 
+    die "The second argument is empty."
+    unless %result.elems > 0;
+
     # Find word candidates and distances for each question
     my @dists = @questions.map(-> $q { $q => %result.keys.map(-> $k { $k => string-distance($q, $k) }).sort(*.value) });
 
