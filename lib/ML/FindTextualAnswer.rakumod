@@ -105,13 +105,13 @@ multi sub llm-textual-answer-function(**@args, *%args) {
 #===========================================================
 #| Classifies given text into given given labels using an LLM.
 our proto llm-classify($text, @classLabels,
-                       :$llm-evaluator = Whatever,
+                       :e(:$llm-evaluator) = Whatever,
                        :$epilog = Whatever,
                        *%args) is export {*}
 
 multi sub llm-classify(@texts,
                        @classLabels is copy,
-                       :$llm-evaluator is copy = Whatever,
+                       :e(:$llm-evaluator) is copy = Whatever,
                        :$epilog = Whatever,
                        *%args
                        ) {
@@ -120,7 +120,7 @@ multi sub llm-classify(@texts,
 
 multi sub llm-classify(Str $text,
                        @classLabels is copy,
-                       :e($llm-evaluator) is copy = Whatever,
+                       :e(:$llm-evaluator) is copy = Whatever,
                        :$epilog = Whatever,
                        *%args
                        ) {
